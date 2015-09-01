@@ -25,6 +25,7 @@ var Video = React.createClass({
     onLoad: PropTypes.func,
     onError: PropTypes.func,
     onProgress: PropTypes.func,
+    onResize: PropTypes.func,
     onEnd: PropTypes.func,
   },
 
@@ -60,6 +61,10 @@ var Video = React.createClass({
     this.props.onEnd && this.props.onEnd(event.nativeEvent);
   },
 
+  _onResize(event) {
+    this.props.onResize && this.props.onResize(event.nativeEvent);
+  },
+
   render() {
     var style = [styles.base, this.props.style];
     var source = this.props.source;
@@ -92,6 +97,7 @@ var Video = React.createClass({
       },
       onVideoLoad: this._onLoad,
       onVideoProgress: this._onProgress,
+      onVideoResize: this._onResize,
       onVideoEnd: this._onEnd,
     });
 
