@@ -29,6 +29,8 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
   id _progressUpdateTimer;
   int _progressUpdateInterval;
   NSDate *_prevProgressUpdateTime;
+  CGSize _prevOverlayFrameSize;
+  CGSize _initialOverlayFrameSize;
 
   /* Keep track of any modifiers, need to be applied after each play */
   float _volume;
@@ -92,11 +94,32 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 
 - (void)sendProgressUpdate
 {
+
   AVPlayerItem *video = [_player currentItem];
   if (video == nil || video.status != AVPlayerItemStatusReadyToPlay) {
     return;
   }
 
+    
+    CGSize contentSize = _controller.contentOverlayView.frame.size;
+
+    if (CGSizeEqualToSize(CGSizeZero, _initialOverlayFrameSize)) {
+        _initialOverlayFrameSize = contentSize;
+    }
+    
+    if (!CGSizeEqualToSize(contentSize, _prevOverlayFrameSize)) {
+        if (CGSizeEqualToSize(contentSize, _initialOverlayFrameSize)) {
+            [_eventDispatcher sendInputEventWithName:@"onVideoResize"
+                                                body:@{@"state": @"embedded",
+                                                       @"target": self.reactTag}];
+        } else {
+            [_eventDispatcher sendInputEventWithName:@"onVideoResize"
+                                                body:@{@"state": @"fullscreen",
+                                                       @"target": self.reactTag}];
+        }
+        _prevOverlayFrameSize = contentSize;
+    }
+    
   if (_prevProgressUpdateTime == nil || (([_prevProgressUpdateTime timeIntervalSinceNow] * -1000.0) >= _progressUpdateInterval)) {
     [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                         body:@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(video.currentTime)],
@@ -140,6 +163,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   _progressUpdateInterval = 250;
   _prevProgressUpdateTime = nil;
+  _prevOverlayFrameSize = CGSizeZero;
 
   [self stopProgressTimer];
 
@@ -409,6 +433,7 @@ static NSString *const playbackLikelyToKeepUpKeyPath = @"playbackLikelyToKeepUp"
 {
   [_progressUpdateTimer invalidate];
   _prevProgressUpdateTime = nil;
+  _prevOverlayFrameSize = CGSizeZero;
 
   [_player pause];
   _player = nil;

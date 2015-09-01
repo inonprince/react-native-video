@@ -24,7 +24,8 @@ RCT_EXPORT_MODULE();
     @"onVideoError",
     @"onVideoProgress",
     @"onVideoSeek",
-    @"onVideoEnd"
+    @"onVideoEnd",
+    @"onVideoResize"
   ];
 }
 
