@@ -1,5 +1,7 @@
-var React = require('react-native');
-var { StyleSheet, requireNativeComponent, PropTypes, NativeModules, } = React;
+var React = require('react');
+var ReactNative = require('react-native');
+
+var { StyleSheet, requireNativeComponent, PropTypes, NativeModules, } = ReactNative;
 
 var VideoResizeMode = require('./VideoResizeMode');
 var merge = require('merge');
